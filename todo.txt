@@ -1,0 +1,6 @@
+- choice of function of v
+  - 
+- truck
+- cross lane
+- car crash
+- self-driving vehicle

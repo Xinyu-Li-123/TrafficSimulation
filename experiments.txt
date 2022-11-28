@@ -1,0 +1,23 @@
+Setting:
+    - looping road (like a circle)
+    - fixed number of cars
+    - same type of cars
+    - different types of drivers
+
+- Why cross lane?
+    - to bypass a traffic jam / accident
+        cross from a jammed lane to an empty lane, drive pass the jam, and cross back
+
+- What logic should self-driving car follow?
+    take into account 5 cars in the front and 4 cars at the back
+    Control speed so that 11 cars run at constant speed and high average speed.
+
+    - maybe always maintain the same speed as the car in front?
+
+- Will self-driving car help? How many percentage is needed?
+
+- (Fundamental diagram of traffic flow)[https://en.wikipedia.org/wiki/Fundamental_diagram_of_traffic_flow#:~:text=The%20fundamental%20diagram%20of%20traffic,basis%20of%20the%20fundamental%20diagram.]
+
+- (Diagram and Shock Wave)[https://sboyles.github.io/teaching/ce392d/5-lwrmodel.pdf]
+
+- total stopping distance = perception-reaction distance + braking distance.
