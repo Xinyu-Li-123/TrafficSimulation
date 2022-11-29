@@ -3,22 +3,32 @@ import numpy as np
 from parameter.road import *
 from parameter.vehicle import *
 from parameter.simulation import *
+from utils.utils import KMPH_to_MPS, MPS_TO_KMPH
 
 def dummy_initialize():
     # compute maximal capacity of each lane based on vehicle parameters
+    loc = np.zeros(N, dtype=float)
+    loc = np.random.random(N)*D - D//2
+    d = np.zeros(N, dtype=float)
+    d[0] = np.inf           # no car in front of 0th car (first car entering highway)      
+    v = np.ones(N, dtype=float) * 25
+    a = np.zeros(N, dtype=float)
+    # a = np.random.random(N) * 100
+    return loc, d, v, a
 
-
-    loc = np.zeros((LANE_NUM, N, 2))    # (lane_index, vehicle_index, x/y)
-
-    # dummy initialization: linearly spaced vehicles
-    for i in range(LANE_NUM):
-        loc[i, :, 0] = np.linspace(0, D, N)
-        loc[i, :, 1] = i
-
-    d = np.zeros((LANE_NUM, N))
-
-    # v = np.abs(np.random.normal(0.0, 1.0, (LANE_NUM, N)) * 25)     # velocity (m/s) (25 m/s = 90 km/h)
-    # v = np.random.normal(0.0, 1.0, (LANE_NUM, N)) * 25              # velocity (m/s) (25 m/s = 90 km/h)
-    v = np.ones((LANE_NUM, N)) * 25              # velocity (m/s) (25 m/s = 90 km/h)
-    a = np.zeros((LANE_NUM, N))
+#TODO: abnormal update when using this initialization
+# only update 
+def partial_highway_initialize():
+    """
+    Part of a highway. No need to speed up / down when entering / exiting highway.
+    """
+    loc = np.zeros(N, dtype=float)
+    loc[:] = (np.arange(N-1, -1, -1)*5 - 5*N + D // 2)    # evenly-spaced with a gap of 5m
+    d = np.zeros(N, dtype=float)
+    d[0] = np.inf 
+    d[1:] = loc[1:] - loc[:-1]
+    v = np.zeros(N, dtype=float)
+    v[:] = np.ones(N) * 25
+    # v[:] = np.ones(N) * 25 + 2*(np.random.random(N)-0.5)*5
+    a = np.zeros(N, dtype=float)
     return loc, d, v, a

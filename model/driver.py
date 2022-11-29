@@ -18,13 +18,3 @@ Types of cars:
 import numpy as np
 import utils
 
-class Driver:
-    def __init__(self, car, speed=0, lane=0, position=np.zeros(2)):
-        self.car = car
-        self.speed = 0
-        self.lane = lane
-        self.position = np.zeros(2)
-        self.front = None
-
-    def update(self):
-        self.position += self.speed * utils.dt

@@ -1,12 +1,15 @@
 Setting:
-    - looping road (like a circle)
+    - segment of highway
+        - with entering/exiting queue
+            entering/exiting a highway from a ramp
+        - without entering/exiting queue
+            in the middle of a long highway
     - fixed number of cars
     - same type of cars
     - different types of drivers
 
-- Why cross lane?
-    - to bypass a traffic jam / accident
-        cross from a jammed lane to an empty lane, drive pass the jam, and cross back
+- How to update velocity?  
+    Different velocity update functions. 
 
 - What logic should self-driving car follow?
     take into account 5 cars in the front and 4 cars at the back
