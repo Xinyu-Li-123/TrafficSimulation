@@ -1,10 +1,11 @@
 from parameter.road import *
 from parameter.vehicle import *
 from parameter.simulation import *
+from utils.utils import ONE_TO_ZERO
 import numpy as np
 
 
-def dummpy_update(loc, d, v, a, onroad_mask):
+def dummpy_update(loc, d, v, a):
     """
     a dummpy update function for testing the first way of updating
 
@@ -15,8 +16,10 @@ def dummpy_update(loc, d, v, a, onroad_mask):
       - arr += d_arr is in-place, but arr = arr + d_arr is not
       - arr[:] = arr[:] + num is in-place
     """
-    loc[onroad_mask] = loc[onroad_mask] + v[onroad_mask] * dt
-    d[1:] = loc[1:] - loc[:-1]
-    v[onroad_mask] = v[onroad_mask] + a[onroad_mask]*dt
-    a[onroad_mask] = a[onroad_mask]
+    loc[:] = (loc + v * dt) % D 
+    d[:] = (loc[ONE_TO_ZERO] - loc) % D
+    # d[0] = (loc[N-1] - loc[0]) % D
+    # d[1:] = (loc[:-1] - loc[1:]) % D
+    v[:] = v + a*dt
+    a[:] = a
 
