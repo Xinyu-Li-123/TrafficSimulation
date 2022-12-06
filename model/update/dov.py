@@ -24,6 +24,7 @@ def _compute_optimal_velocity(d):
 
 
 def dov_update(loc, d, v, a):
+    global count
     _compute_optimal_velocity(d)            # update ov
     loc[:] = (loc + v*dt) % D               # update loc
     d[:] = (loc[ONE_TO_ZERO] - loc) % D     # update d

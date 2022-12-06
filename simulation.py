@@ -16,7 +16,7 @@ from model.update import dummy
 from model.update import dov
 from model.initialize import *
 
-from utils.utils import ONE_TO_ZERO, MPS_TO_KMPH, SMALLNUM
+from utils.utils import is_collided 
 
 np.random.seed(11)
 
@@ -28,20 +28,20 @@ def init():
 def update(i, update_axis=True):
     global loc, d, v, a # , onroad_mask
     # fig.canvas.resize_event()
-    if (i+1) % info_step == 0:
+    if (i+1) % info_step == 0 or i == total_step:
         # print(f"d={d}") 
         # print(f"loc={loc}")
         # print(f"v={v*MPS_TO_KMPH}")
         # print(f"d_min={d.min()}")
         # print(f"computed d_min={np.min((loc[ONE_TO_ZERO] - loc))%D}")
         print(f"mean(v)={v.mean()*MPS_TO_KMPH}, max(v)={v.max()*MPS_TO_KMPH}, min(v)={v.min()*MPS_TO_KMPH}")
-        print(f"{i+1}/{int(T/dt)}")
+        print(f"{i+1}/{total_step}")
         print(f"Time: {(i+1)*dt:.2f}/{T:.2f}s")
     elif i == 0:
         # print(f"d={d}") 
         # print(f"loc={loc}")
         # print(f"v={v*MPS_TO_KMPH}")
-        print(f"{i}/{int(T/dt)}")
+        print(f"{i}/{total_step}")
         print(f"Time: {(i+1)*dt:.2f}/{T:.2f}s")
 
 
@@ -54,9 +54,12 @@ def update(i, update_axis=True):
         all_vehicles.set_xdata(loc)
         detailed_vehicles.set_xdata(loc)
 
+    # traffic snake detection:
+
+
     # collision detection  
-    if np.sum(d <= car_length) > 0:
-        print("\n\nA collision between two vehicles occurs.\n\n")
+    if is_collided(d):
+        raise ValueError("A collision between two vehicles occurs.")
 
     
     if np.sum(v < 0) > 0:
@@ -75,7 +78,7 @@ def update(i, update_axis=True):
 
 
 # loc, d, v, a = dummy_initialize()
-loc, d, v, a = partial_highway_initialize(1)
+loc, d, v, a = partial_highway_initialize(10)
 # onroad_mask = np.zeros(N, dtype=bool)
 # onroad_mask = np.ones(N, dtype=bool)
 # onroad_mask = np.random.random(N) < 0.1
@@ -133,28 +136,36 @@ detailed_vehicles, = ax[1].plot(
 
 # Print parameters
 print("Simulation time: {}s\ndt: {:.2f}s\n#Update: {}\nAnimation speedup: {}".format(
-    T, dt, int(T/dt), speedup))
+    T, dt, total_step, speedup))
 print(f"Number of vehicles: {N}")
 print(f"Road length: {D}m")
 print(f"Save animation: {save_animation}")
 
 if display_animation or save_animation:
-    ani = animation.FuncAnimation(fig, update, init_func=init, frames=int(T/dt), interval=int(dt*1000/speedup), blit=True, repeat=False)
+    ani = animation.FuncAnimation(fig, update, init_func=init, frames=total_step, interval=int(dt*1000/speedup), blit=True, repeat=False)
     if save_animation:
         ani.save('./results/animation.mp4', writer='ffmpeg', fps=240)
     else:
         plt.show()
 else:
-    track_vehicle_loc = np.zeros((int(T/dt)//100, N))
-    for i in range(int(T/dt)):
+    track_vehicle_loc = np.zeros((total_step//track_iteration_step, N))
+    metric_mean_velocity = np.zeros(total_step//track_iteration_step)
+    metric_std_velocity = np.zeros(total_step//track_iteration_step)
+
+    for i in range(total_step):
         update(i, update_axis=False)
-        if i % 100 == 0:
-            track_vehicle_loc[i//100, :] = loc
+        if i % track_iteration_step == 0:
+            track_vehicle_loc[i//track_iteration_step, :] = loc
+            metric_mean_velocity[i//track_iteration_step] = np.mean(v)
+            metric_std_velocity[i//track_iteration_step] = np.std(v)
     
     all_vehicles.set_xdata(loc)
     detailed_vehicles.set_xdata(loc)
     fig2, ax2 = plt.subplots(1, 1)
-    for n in range(N-20, N, 2):
+    fig3, ax3 = plt.subplots(2, 1)
+
+    # plot x-t relation
+    for n in track_vehicle_range:
         track_single_vehicle_loc = track_vehicle_loc[:, n]
 
         offset = np.zeros_like(track_single_vehicle_loc)
@@ -163,10 +174,26 @@ else:
                 offset[j:] += D
         track_single_vehicle_loc += offset
         ax2.plot(
-            np.linspace(0, T, int(T/dt)//100), track_single_vehicle_loc, label=f"Vehicle {n}")
+            np.linspace(0, T, total_step//track_iteration_step), track_single_vehicle_loc, label=f"Vehicle {n}")
     ax2.set_xlabel('Time (s)')
     ax2.set_ylabel('Location (m)')
     ax2.set_title('Location of vehicles')
     ax2.legend()
+
+    # plot mean(v)-t relation
+    ax3[0].plot(
+        np.linspace(0, T, total_step//track_iteration_step), metric_mean_velocity)
+    # vmax as reference
+    ax3[0].plot(np.linspace(0, T, total_step//track_iteration_step), np.ones(total_step//track_iteration_step)*vmax, 'r--')
+    ax3[0].set_xlabel('Time (s)')
+    ax3[0].set_ylabel('Mean velocity (m/s)')
+    ax3[0].set_title('Mean velocity of vehicles')
+
+    # plot std(v)-t relation
+    ax3[1].plot(
+        np.linspace(0, T, total_step//track_iteration_step), metric_std_velocity)
+    ax3[1].set_xlabel('Time (s)')
+    ax3[1].set_ylabel('Std velocity (m/s)')
+    ax3[1].set_title('Std velocity of vehicles')
 
     plt.show()

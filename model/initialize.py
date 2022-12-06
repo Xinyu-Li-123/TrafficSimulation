@@ -3,7 +3,7 @@ import numpy as np
 from parameter.road import *
 from parameter.vehicle import *
 from parameter.simulation import *
-from utils.utils import KMPH_to_MPS, ONE_TO_ZERO, SMALLNUM
+from utils.utils import ONE_TO_ZERO, SMALLNUM
 from parameter.model import dov_param 
 
 def dummy_initialize():
@@ -22,7 +22,7 @@ def partial_highway_initialize(jitter=0):
     Evenly spaced with a random jitter in the range of [-jitter, jitter]
     """
     # Check if there are too much cars
-    MAX_CAR_NUM = int(D / car_length)
+    MAX_CAR_NUM = int(D / car_length+2*jitter)
     if N > MAX_CAR_NUM:
         raise ValueError(
             f"Too many vehicles for the given road length\n"
@@ -30,7 +30,8 @@ def partial_highway_initialize(jitter=0):
 
     loc = np.zeros(N, dtype=float)
     # loc[:] = np.linspace(0, D-5, N) + np.random.rand(*loc.shape)*2
-    loc[:] = np.linspace(0, (car_length+2*jitter)*N, N) + 2*(np.random.rand(*loc.shape)-0.5)*jitter
+    # loc[:] = np.linspace(0, (car_length+2*jitter)*N, N) + 2*(np.random.rand(*loc.shape)-0.5)*jitter
+    loc[:] = np.linspace(0, (car_length+0.5)*N, N)
     d = np.zeros(N, dtype=float) 
     # d[0] = loc[N-1] - loc[0]
     # d[1:] = loc[1:] - loc[:-1]

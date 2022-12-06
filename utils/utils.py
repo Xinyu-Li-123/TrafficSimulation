@@ -1,5 +1,8 @@
 """
 This file stores parameters for the simulation and some utility functions.
+
+To avoid circular import, this file should not import any other files besides paraemters,
+and files in parameter should not import any files in module utils
 """
 
 import numpy as np
@@ -10,16 +13,26 @@ from parameter.simulation import *
 # There should only be two conversions throughout the simulation:
 # - km/h to m/s during initialization (initialize using km/h, simulate using m/s)
 # - m/s to km/h during outputing statistics (people are more familiar with km/h)
-KMPH_to_MPS = 1000 / 3600
-MPS_TO_KMPH = 1 / KMPH_to_MPS
+
 
 ONE_TO_ZERO = np.array(list(range(1, N)) + [0])   # to loop back from 1 to N-1 to 0 when calculating distance
 
-def is_collided(d):
-    pass 
-
 SMALLNUM = 1e-2
 BIGNUM = 1e6
+
+print(car_length)
+
+def is_collided(d):
+    return np.sum(d <= car_length) > 0
+
+def find_traffic_snake(v):
+    """
+    Find traffic snake by finding the longest sequence of vehicles that are still.
+    """
+    ans = np.where(v <= SMALLNUM)
+    if ans.size != 0:
+        print(ans)
+
 
 def log_inf(x):
     x = np.copy(x)
@@ -27,3 +40,4 @@ def log_inf(x):
     x[min_mask] = -BIGNUM     # when x is 
     x[np.logical_not(min_mask)] = np.log(x[np.logical_not(min_mask)])
     return x
+

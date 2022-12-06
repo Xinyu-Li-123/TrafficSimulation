@@ -1,8 +1,8 @@
 """
 Parameters of a single vehicle
 """
-
-from utils.utils import KMPH_to_MPS
+KMPH_to_MPS = 1000 / 3600
+MPS_TO_KMPH = 1 / KMPH_to_MPS
 
 # Volkswagen Santana 
 car_width = 1.7     
