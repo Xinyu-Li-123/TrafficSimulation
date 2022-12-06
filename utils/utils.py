@@ -18,10 +18,6 @@ ONE_TO_ZERO = np.array(list(range(1, N)) + [0])   # to loop back from 1 to N-1 t
 def is_collided(d):
     pass 
 
-#TODO: Log may yield NaN
-# This function is used so that log(~0) = -inf instead of NaN
-# Source: https://stackoverflow.com/questions/18191273/numpy-log-with-inf-not-nans
-
 SMALLNUM = 1e-2
 BIGNUM = 1e6
 

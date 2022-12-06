@@ -10,5 +10,3 @@ car_length = 4.5
 
 vmax = 120
 vmax *= KMPH_to_MPS
-
-MIN_FOLLOWING_DISTANCE = 1
