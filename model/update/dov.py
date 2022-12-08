@@ -14,25 +14,28 @@ import numpy as np
 
 ov = np.zeros(N)
 
-def _compute_optimal_velocity(d):
+def _compute_optimal_velocity(d, use_smoothing):
     min_mask = d < dov_param.dmin 
     max_mask = d > dov_param.dmax 
     mid_mask = np.logical_not(np.logical_or(min_mask, max_mask))
     ov[min_mask] = 0
-    ov[mid_mask] = vmax * log_inf(d[mid_mask] / dov_param.dmin) / log_inf(dov_param.dmax/dov_param.dmin)
+    if use_smoothing:
+        ov[mid_mask] = vmax * log_inf(d[mid_mask] / dov_param.dmin) / log_inf(dov_param.dmax/dov_param.dmin)
+    else:
+        ov[mid_mask] = vmax * (d[mid_mask] - dov_param.dmin) / (dov_param.dmax - dov_param.dmin)
     ov[max_mask] = vmax 
 
 
-def dov_update(loc, d, v, a):
+def dov_update(loc, d, v, a, use_smoothing=True):
     global count
-    _compute_optimal_velocity(d)            # update ov
+    _compute_optimal_velocity(d, use_smoothing=use_smoothing)            # update ov
     loc[:] = (loc + v*dt) % D               # update loc
     d[:] = (loc[ONE_TO_ZERO] - loc) % D     # update d
     # v[:] = ov                               # update v
     v[:] = (dt * ov + dov_param.tau*v) / (dt + dov_param.tau)
 
-def dov_smart_update(loc, d, v, a):
-    _compute_optimal_velocity(d)            # update ov
+def dov_smart_update(loc, d, v, a, use_smoothing=True):
+    _compute_optimal_velocity(d, use_smoothing=use_smoothing)            # update ov
     loc[:] = (loc + v*dt) % D               # update loc
     d[:] = (loc[ONE_TO_ZERO] - loc) % D     # update d
     # v[:] = ov                               # update v

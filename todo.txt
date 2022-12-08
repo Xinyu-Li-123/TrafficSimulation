@@ -1,6 +1,10 @@
-- choice of function of v
-  - 
-- truck
-- cross lane
-- car crash
-- self-driving vehicle
+- Theoretical and Numerical analysis of traffic snake on a ring
+    Under which density will the snake shrink / stay / grow?
+    - Possible idea
+      Draw the graph of n-v 
+        where n is car number (nth car has velocity v_n)
+
+- [Experiment] Using the unsmoothed optimal velocity function will result in a smaller equibrium velocity. Why?
+
+- self-driving vehicle / smarter velocity with more input
+    How to modify the velocity function to fight against the traffic snake?

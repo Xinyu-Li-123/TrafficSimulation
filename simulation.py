@@ -34,7 +34,7 @@ def update(i, update_axis=True):
         # print(f"v={v*MPS_TO_KMPH}")
         # print(f"d_min={d.min()}")
         # print(f"computed d_min={np.min((loc[ONE_TO_ZERO] - loc))%D}")
-        print(f"mean(v)={v.mean()*MPS_TO_KMPH}, max(v)={v.max()*MPS_TO_KMPH}, min(v)={v.min()*MPS_TO_KMPH}")
+        # print(f"mean(v)={v.mean()*MPS_TO_KMPH}, max(v)={v.max()*MPS_TO_KMPH}, min(v)={v.min()*MPS_TO_KMPH}")
         print(f"{i+1}/{total_step}")
         print(f"Time: {(i+1)*dt:.2f}/{T:.2f}s")
     elif i == 0:
@@ -47,7 +47,7 @@ def update(i, update_axis=True):
 
     # dummy.dummpy_update(loc, d, v, a) 
 
-    dov.dov_update(loc, d, v, a)
+    dov.dov_update(loc, d, v, a, use_smoothing=use_smoothing)
 
     if update_axis:
         # update ax[0] and ax[1]
@@ -148,33 +148,36 @@ if display_animation or save_animation:
     else:
         plt.show()
 else:
-    track_vehicle_loc = np.zeros((total_step//track_iteration_step, N))
-    metric_mean_velocity = np.zeros(total_step//track_iteration_step)
-    metric_std_velocity = np.zeros(total_step//track_iteration_step)
+    xt_track_vehicle_loc = np.zeros((total_step//xt_track_iteration_step, N))
+    xt_track_vehicle_loc = np.zeros((total_step//xt_track_iteration_step, N))
+    # vt_track_vehicle_velocity = np.zeros((total_step//vt_track_iteration_step, N))
+    metric_mean_velocity = np.zeros(total_step//xt_track_iteration_step)
+    metric_std_velocity = np.zeros(total_step//xt_track_iteration_step)
 
     for i in range(total_step):
         update(i, update_axis=False)
-        if i % track_iteration_step == 0:
-            track_vehicle_loc[i//track_iteration_step, :] = loc
-            metric_mean_velocity[i//track_iteration_step] = np.mean(v)
-            metric_std_velocity[i//track_iteration_step] = np.std(v)
+        if i % xt_track_iteration_step == 0:
+            xt_track_vehicle_loc[i//xt_track_iteration_step, :] = loc
+            metric_mean_velocity[i//xt_track_iteration_step] = np.mean(v)
+            metric_std_velocity[i//xt_track_iteration_step] = np.std(v)
     
     all_vehicles.set_xdata(loc)
     detailed_vehicles.set_xdata(loc)
-    fig2, ax2 = plt.subplots(1, 1)
-    fig3, ax3 = plt.subplots(2, 1)
+    fig2, ax2 = plt.subplots(1, 1)      # plot x-t relation
+    fig3, ax3 = plt.subplots(2, 1)      # plot mean and std of velocity
+    # fig4, ax4 = plt.subplots(1, 1)      # plot v-t relation and traffic snake
 
     # plot x-t relation
-    for n in track_vehicle_range:
-        track_single_vehicle_loc = track_vehicle_loc[:, n]
+    for n in xt_track_vehicle_range:
+        xt_track_single_vehicle_loc = xt_track_vehicle_loc[:, n]
 
-        offset = np.zeros_like(track_single_vehicle_loc)
-        for j in range(1, track_single_vehicle_loc.shape[0]):
-            if track_single_vehicle_loc[j] < track_single_vehicle_loc[j-1]:
+        offset = np.zeros_like(xt_track_single_vehicle_loc)
+        for j in range(1, xt_track_single_vehicle_loc.shape[0]):
+            if xt_track_single_vehicle_loc[j] < xt_track_single_vehicle_loc[j-1]:
                 offset[j:] += D
-        track_single_vehicle_loc += offset
+        xt_track_single_vehicle_loc += offset
         ax2.plot(
-            np.linspace(0, T, total_step//track_iteration_step), track_single_vehicle_loc, label=f"Vehicle {n}")
+            np.linspace(0, T, total_step//xt_track_iteration_step), xt_track_single_vehicle_loc, label=f"Vehicle {n}")
     ax2.set_xlabel('Time (s)')
     ax2.set_ylabel('Location (m)')
     ax2.set_title('Location of vehicles')
@@ -182,18 +185,20 @@ else:
 
     # plot mean(v)-t relation
     ax3[0].plot(
-        np.linspace(0, T, total_step//track_iteration_step), metric_mean_velocity)
+        np.linspace(0, T, total_step//xt_track_iteration_step), metric_mean_velocity)
     # vmax as reference
-    ax3[0].plot(np.linspace(0, T, total_step//track_iteration_step), np.ones(total_step//track_iteration_step)*vmax, 'r--')
+    ax3[0].plot(np.linspace(0, T, total_step//xt_track_iteration_step), np.ones(total_step//xt_track_iteration_step)*vmax, 'r--')
     ax3[0].set_xlabel('Time (s)')
     ax3[0].set_ylabel('Mean velocity (m/s)')
     ax3[0].set_title('Mean velocity of vehicles')
 
     # plot std(v)-t relation
     ax3[1].plot(
-        np.linspace(0, T, total_step//track_iteration_step), metric_std_velocity)
+        np.linspace(0, T, total_step//xt_track_iteration_step), metric_std_velocity)
     ax3[1].set_xlabel('Time (s)')
     ax3[1].set_ylabel('Std velocity (m/s)')
     ax3[1].set_title('Std velocity of vehicles')
+
+    
 
     plt.show()
