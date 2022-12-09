@@ -7,10 +7,10 @@ Parameters to
 import numpy as np
 
 # tunable parameters
-N = 50        # number of vehicles      
+N = 50        # number of vehicles, N >= 2   
 D = 1000           # length of the highway (m)        
 detail_range = (D//2 - 200, D//2 + 200) # range of the detailed plot
-T = 10        # simulation time (s)
+T = 2400        # simulation time (s)
 dt = 0.05       # time step (s)
 total_step = int(T/dt) # total number of steps
 
