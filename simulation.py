@@ -58,7 +58,7 @@ def update(i):
             all_vehicle_locs.set_xdata(loc)
             detailed_vehicle_locs.set_xdata(loc)
         elif animation_type == 'vt':
-            all_vehicle_velocities.set_ydata(v)
+            all_vehicle_velocities.set_ydata(v*MPS_TO_KMPH)
 
     # traffic snake detection:
 
@@ -168,18 +168,20 @@ if draw_animation:
         fig, ax = plt.subplots(1, 1)      # plot v-t relation and traffic snake
 
         all_vehicle_velocities, = ax.plot(
-            np.arange(N), v,
+            np.arange(N), v*MPS_TO_KMPH,
             marker="o", markersize=5, markerfacecolor='r')
 
         ax.set_xlim(-1, N*1.1)
-        ax.set_ylim(-1, vmax*1.1)
+        ax.set_ylim(-1, vmax*1.1*MPS_TO_KMPH)
         ax.set_xlabel('Time (s)')
-        ax.set_ylabel('Velocity (m/s)')
+        ax.set_ylabel('Velocity (km/h)')
         ax.set_title(f'Velocity distribution at time 0.00/{T:.2f}')
-        ax.legend()
+        ax.set_aspect((N*1.1)/((vmax*MPS_TO_KMPH*1.1)*1.2))
+        # ax.legend()
 
-        # a dotted line that indicates maximal velocity
-        ax.plot([0, N], [vmax, vmax], 'k--')
+        # a red dotted line that indicates maximal velocity
+        ax.plot([0, N], [vmax*MPS_TO_KMPH, vmax*MPS_TO_KMPH], 'r--')
+        ax.text(N*0.8, vmax*MPS_TO_KMPH*1.01, f"vmax={vmax*MPS_TO_KMPH:.2f}km/h", fontsize=10)
 
         ani = animation.FuncAnimation(fig, update, init_func=init, frames=total_step, interval=int(dt*1000/speedup), blit=True, repeat=False)
 
@@ -225,18 +227,18 @@ else:
 
     # plot mean(v)-t relation
     ax3[0].plot(
-        np.linspace(0, T, total_step//xt_track_iteration_step), metric_mean_velocity)
+        np.linspace(0, T, total_step//xt_track_iteration_step), metric_mean_velocity*MPS_TO_KMPH)
     # vmax as reference
-    ax3[0].plot(np.linspace(0, T, total_step//xt_track_iteration_step), np.ones(total_step//xt_track_iteration_step)*vmax, 'r--')
+    ax3[0].plot(np.linspace(0, T, total_step//xt_track_iteration_step), np.ones(total_step//xt_track_iteration_step)*vmax*MPS_TO_KMPH, 'r--')
     ax3[0].set_xlabel('Time (s)')
-    ax3[0].set_ylabel('Mean velocity (m/s)')
+    ax3[0].set_ylabel('Mean velocity (km/h)')
     ax3[0].set_title('Mean velocity of vehicles')
 
     # plot std(v)-t relation
     ax3[1].plot(
-        np.linspace(0, T, total_step//xt_track_iteration_step), metric_std_velocity)
+        np.linspace(0, T, total_step//xt_track_iteration_step), metric_std_velocity*MPS_TO_KMPH)
     ax3[1].set_xlabel('Time (s)')
-    ax3[1].set_ylabel('Std velocity (m/s)')
+    ax3[1].set_ylabel('Std velocity (km/h)')
     ax3[1].set_title('Std velocity of vehicles')
     
     plt.show()

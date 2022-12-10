@@ -7,15 +7,15 @@ Parameters to
 import numpy as np
 
 # tunable parameters
-N = 50        # number of vehicles, N >= 2   
+N = 30        # number of vehicles, N >= 2   
 D = 1000           # length of the highway (m)        
 detail_range = (D//2 - 200, D//2 + 200) # range of the detailed plot
-T = 2400        # simulation time (s)
+T = 1000        # simulation time (s)
 dt = 0.05       # time step (s)
 total_step = int(T/dt) # total number of steps
 
 # update parameters
-use_smoothing = True
+use_smoothing = False
 
 # animation parameters
 animation_types = ['vehicles', 'vt']
@@ -41,11 +41,15 @@ else:
 
 
 speedup = 100
-info_step = 5000         # print information every info_step frames
+info_step = 500         # print information every info_step frames
 
 # x-t tracking parameters
 xt_track_iteration_step = 10
-xt_track_vehicle_range = np.arange(0, max(N, 50), 10)
+xt_track_max_vehicle = 10
+if N < xt_track_max_vehicle:
+    xt_track_vehicle_range = np.arange(0, N, 1)
+else:
+    xt_track_vehicle_range = np.linspace(0, N-1, xt_track_max_vehicle, dtype=int)
 
 # v-t tracking parameters
 vt_track_iteration_step = 100
@@ -53,4 +57,4 @@ vt_track_max_vehicle = 100
 if N < vt_track_max_vehicle:
     vt_track_vehicle_range = np.arange(0, N, 1)
 else:
-    vt_track_vehicle_range = np.linspace(0, N, vt_track_max_vehicle, dtype=int)
+    vt_track_vehicle_range = np.linspace(0, N-1, vt_track_max_vehicle, dtype=int)
