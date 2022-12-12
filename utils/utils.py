@@ -37,7 +37,26 @@ def find_traffic_snake(v):
 def log_inf(x):
     x = np.copy(x)
     min_mask = x < SMALLNUM
-    x[min_mask] = -BIGNUM     # when x is 
+    x[min_mask] = -BIGNUM     # when x is too small, use a large negative number instead
     x[np.logical_not(min_mask)] = np.log(x[np.logical_not(min_mask)])
     return x
 
+def log_inf_approx(x, order=3):
+    """
+    Approximate log_inf by a polynomial of the given order.
+    """
+    x = np.copy(x)
+    min_mask = x < SMALLNUM
+    x[min_mask] = -BIGNUM     
+    if order % 2 == 0:
+        raise ValueError('order should be odd')
+    elif order == 1:
+        x[np.logical_not(min_mask)] = 1 - x[np.logical_not(min_mask)]
+    elif order == 3:
+        x[np.logical_not(min_mask)] = \
+            -(1-x[np.logical_not(min_mask)]) \
+            -(1-x[np.logical_not(min_mask)])**2/2 \
+            -(1-x[np.logical_not(min_mask)])**3/6
+    else:
+        raise ValueError('order should be 1 or 2')
+    return x

@@ -8,3 +8,8 @@
 
 - self-driving vehicle / smarter velocity with more input
     How to modify the velocity function to fight against the traffic snake?
+
+    The new velocity function should
+    - take more d as input
+    - can mitigate traffic snake 
+    - still resilient to traffic accident (a sudden drop of v to 0 of some car)

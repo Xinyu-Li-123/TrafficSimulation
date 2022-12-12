@@ -6,23 +6,24 @@ Parameters to
 
 import numpy as np
 
-# tunable parameters
-N = 30        # number of vehicles, N >= 2   
+# numeerical parameters
+N = 50        # number of vehicles, N >= 2   
 D = 1000           # length of the highway (m)        
 detail_range = (D//2 - 200, D//2 + 200) # range of the detailed plot
 T = 1000        # simulation time (s)
 dt = 0.05       # time step (s)
 total_step = int(T/dt) # total number of steps
 
-# update parameters
-use_smoothing = False
-
 # animation parameters
 animation_types = ['vehicles', 'vt']
 animation_type = animation_types[1]
-display_animation = True        # show animation on screen
-save_animation = False          # save animation to file
+
+animation_demo_types = ['display', 'save', 'summary']
+animation_demo_type = animation_demo_types[1]
+display_animation = animation_demo_type == 'display'    # show animation on screen
+save_animation = animation_demo_type == 'save'      # save animation to file
 draw_animation = display_animation or save_animation    # draw animation
+animation_name = "ani_vt_smooth_equilibirum"
 
 if display_animation and not save_animation:
     if animation_type == 'vehicles':
