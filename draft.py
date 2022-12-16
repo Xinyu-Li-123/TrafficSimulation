@@ -33,6 +33,8 @@ fig, ax = plt.subplots(1, 2, figsize=(8, 6))
 for _ in range(len(dts)):
     ax[0].plot(all_v[_,:], label='dt={}'.format(dts[_]))
     ax[1].plot(all_v[_,:] - all_v[0,:], label='dt={}'.format(dts[_]))
+ax[0].set_xlabel('t')
+ax[0].set_ylabel('v')
 ax[0].legend()
 ax[1].legend()
 plt.show()
