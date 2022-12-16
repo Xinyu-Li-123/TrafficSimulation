@@ -1,0 +1,2 @@
+- equidistant_intialize, dov_update, tau=10.0, D=1000, T=1000
+    car crash at around 500s for dt=0.01, 0.02, 0.05, 1

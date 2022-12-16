@@ -6,6 +6,9 @@ and files in parameter should not import any files in module utils
 """
 
 import numpy as np
+import pickle
+import os
+
 from parameter.vehicle import *
 from parameter.simulation import *
 
@@ -22,7 +25,7 @@ BIGNUM = 1e6
 
 print(car_length)
 
-def is_collided(d):
+def check_collision(d):
     return np.sum(d <= car_length) > 0
 
 def find_traffic_snake(v):
@@ -60,3 +63,13 @@ def log_inf_approx(x, order=3):
     else:
         raise ValueError('order should be 1 or 2')
     return x
+
+def save_param(loc, d, v, a, path):
+    """
+    Save loc, d, v, a to a file.
+    """
+    if not os.path.exists('record'):
+        os.mkdir('record')
+    path = os.path.join('record', path)
+    with open(path, 'wb') as f:
+        pickle.dump((loc, d, v, a), f)
