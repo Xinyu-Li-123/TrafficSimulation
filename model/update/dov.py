@@ -19,17 +19,23 @@ def _compute_optimal_velocity(d, dov_update_type):
     ov[min_mask] = 0
     if dov_update_type == dov_param.dov_update_types[0]:
         ov[mid_mask] = \
-            vmax * log_inf(d[mid_mask] / dov_param.dmin) / log_inf(dov_param.dmax/dov_param.dmin)
+            vmax * log_inf(d[mid_mask] / dov_param.dmin) / \
+            log_inf(dov_param.dmax/dov_param.dmin)
     elif dov_update_type == dov_param.dov_update_types[1]:
         # second order approximation of log_inf
         # seems to fail
         ov[mid_mask] = \
-            vmax * log_inf_approx(d[mid_mask]/dov_param.dmin, order=dov_param.dov_update_approx_order) / log_inf(dov_param.dmax / dov_param.dmin)
+            vmax * log_inf_approx(
+                d[mid_mask]/dov_param.dmin, 
+        order=dov_param.dov_update_approx_order) / \
+            log_inf(dov_param.dmax / dov_param.dmin)
     elif dov_update_type == dov_param.dov_update_types[2]:
         ov[mid_mask] = \
-            vmax * (d[mid_mask] - dov_param.dmin) / (dov_param.dmax - dov_param.dmin)
+            vmax * (d[mid_mask] - dov_param.dmin) / \
+                (dov_param.dmax - dov_param.dmin)
     else:
-        raise ValueError('dov_update_type should be one of the following: {}'.format(dov_param.dov_update_types))
+        raise ValueError('dov_update_type should be one of the following: {}'.format(
+            dov_param.dov_update_types))
     ov[max_mask] = vmax 
 
 
@@ -38,14 +44,5 @@ def dov_update(loc, d, v, a, i, dov_update_type="smoothing"):
     _compute_optimal_velocity(d, dov_update_type=dov_param.dov_update_type)            # update ov
     loc[:] = (loc + v*dt) % D               # update loc
     d[:] = (loc[ONE_TO_ZERO] - loc) % D     # update d
-    # v[:] = ov                               # update v
     v[:] = (dt * ov + dov_param.tau*v) / (dt + dov_param.tau)
-    # if i in range(1000, 10000):
-    #     v[40] = 0
-
-def dov_smart_update(loc, d, v, a, i, dov_update_type="smoothing"):
-    _compute_optimal_velocity(d, dov_update_type=dov_param.dov_update_type)            # update ov
-    loc[:] = (loc + v*dt) % D               # update loc
-    d[:] = (loc[ONE_TO_ZERO] - loc) % D     # update d
-    # v[:] = ov                               # update v
-    # TODO: Use front and back 5 distances to determine the current speed
+    
