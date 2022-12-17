@@ -78,7 +78,7 @@ def update(i, draw_animation=True, detect_snake=False):
         collision_step = i
         print(f"Collision occurs at time {i*dt:.2f}/{T:.2f}s, {i+1}/{total_step} steps")
         collided_idx = np.where(d < car_length)[0][0]
-        print(f"collided_idx={collided_idx}")
+        print(f"At {i*dt}/{T}, collided_idx={collided_idx}")
 
 
         if draw_animation:
@@ -116,7 +116,7 @@ print(f"Running simulation with {N} vehicles, duration {T}s, {dt}s time step\n")
 
 # loc, d, v, a = dummy_initialize()
 # loc, d, v, a = partial_highway_initialize()
-loc, d, v, a = equidistant_initialize()
+loc, d, v, a = equidistant_initialize(jitter=0)
 # loc, d, v, a = record_initialize("param_50000.pkl")
 is_collided = False
 collision_step = -1

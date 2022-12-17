@@ -10,7 +10,7 @@ import numpy as np
 N = 50        # number of vehicles, N >= 2   
 D = 1000           # length of the highway (m)        
 detail_range = (D//2 - 200, D//2 + 200) # range of the detailed plot
-T = 1000        # simulation time (s)
+T = 20000        # simulation time (s)
 dt = 0.01       # time step (s
 total_step = int(T/dt) # total number of steps
 

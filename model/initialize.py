@@ -60,6 +60,7 @@ def equidistant_initialize(jitter=0):
     # loc[:] = np.linspace(0, D-5, N) + np.random.rand(*loc.shape)*2
     # loc[:] = np.linspace(0, (car_length+2*jitter)*N, N) + 2*(np.random.rand(*loc.shape)-0.5)*jitter
     loc[:] = np.linspace(0, D, N+1)[:-1]
+    loc[:] += 2*(np.random.rand(*loc.shape)-0.5)*jitter
     d = np.zeros(N, dtype=float) 
     # d[0] = loc[N-1] - loc[0]
     # d[1:] = loc[1:] - loc[:-1]
