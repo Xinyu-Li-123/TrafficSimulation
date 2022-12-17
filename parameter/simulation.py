@@ -10,21 +10,21 @@ import numpy as np
 N = 50        # number of vehicles, N >= 2   
 D = 1000           # length of the highway (m)        
 detail_range = (D//2 - 200, D//2 + 200) # range of the detailed plot
-T = 20000        # simulation time (s)
+T = 1000        # simulation time (s)
 dt = 0.01       # time step (s
 total_step = int(T/dt) # total number of steps
 
 
 # animation parameters
 animation_types = ['vehicles', 'vt']
-animation_type = animation_types[1]
+animation_type = animation_types[0]
 
 animation_demo_types = ['display', 'save', 'summary', "diy"]
-animation_demo_type = animation_demo_types[2]
+animation_demo_type = animation_demo_types[1]
 display_animation = animation_demo_type == 'display'    # show animation on screen
 save_animation = animation_demo_type == 'save'      # save animation to file
 draw_animation = display_animation or save_animation    # draw animation
-animation_name = "ani_vt_smooth_equilibirum"
+animation_name = "ani_xt_congestion"
 animation_start_index = 0       # start animation at this step
 
 # save parameters
@@ -52,13 +52,13 @@ info_step = 50000         # print information every info_step frames
 
 # x-t tracking parameters
 xt_track_iteration_step = 10
-xt_track_max_vehicle = 5
+xt_track_max_vehicle = 10
 if N < xt_track_max_vehicle:
     xt_track_vehicle_range = np.arange(0, N, 1)
 else:
     xt_track_vehicle_range = np.linspace(0, N-1, xt_track_max_vehicle, dtype=int)
-# xt_track_vehicle_range = np.array([0, 1, 2, 3, 4, 5])
-
+xt_track_vehicle_range = np.array([0, 1, 2, 3, 4, 5,6,7,8,9,10,11,12,13,14,15])
+xt_track_vehicle_range = np.arange(N)
 # v-t tracking parameters
 vt_track_iteration_step = 100
 vt_track_max_vehicle = 100

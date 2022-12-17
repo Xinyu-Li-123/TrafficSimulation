@@ -115,8 +115,8 @@ print(f"\t{dov_param.dov_update_type} dov update type...\n")
 print(f"Running simulation with {N} vehicles, duration {T}s, {dt}s time step\n")
 
 # loc, d, v, a = dummy_initialize()
-# loc, d, v, a = partial_highway_initialize()
-loc, d, v, a = equidistant_initialize(jitter=0)
+loc, d, v, a = partial_highway_initialize()
+# loc, d, v, a = equidistant_initialize(jitter=0)
 # loc, d, v, a = record_initialize("param_50000.pkl")
 is_collided = False
 collision_step = -1
@@ -283,7 +283,8 @@ elif animation_demo_type == 'summary':
     ax2.set_xlabel('Time (s)')
     ax2.set_ylabel('Location (m)')
     ax2.set_title('Location of vehicles')
-    ax2.legend()
+    if len(xt_track_vehicle_range) <= 20:
+        ax2.legend()
 
     # plot mean(v)-t relation
     ax3[0].plot(
