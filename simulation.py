@@ -115,8 +115,8 @@ print(f"\t{dov_param.dov_update_type} dov update type...\n")
 print(f"Running simulation with {N} vehicles, duration {T}s, {dt}s time step\n")
 
 # loc, d, v, a = dummy_initialize()
-loc, d, v, a = partial_highway_initialize()
-# loc, d, v, a = equidistant_initialize()
+# loc, d, v, a = partial_highway_initialize()
+loc, d, v, a = equidistant_initialize()
 # loc, d, v, a = record_initialize("param_50000.pkl")
 is_collided = False
 collision_step = -1
@@ -260,109 +260,109 @@ elif animation_demo_type == 'summary':
     # save vt_track_vehicle_velocity
     pickle.dump(vt_track_vehicle_velocity, open(f'./record/{dt}_v.pkl', 'wb'))
 
-    # # all_vehicle_locs.set_xdata(loc)
-    # # detailed_vehicle_locs.set_xdata(loc)
-    # fig2, ax2 = plt.subplots(1, 1)      # plot x-t relation
-    # fig3, ax3 = plt.subplots(2, 1)      # plot mean and std of velocity
-    # fig4, ax4 = plt.subplots(1, 1)      # plot v-t relation
-    # if dov_param.cmp_to_ov:
-    #     fig5, ax5 = plt.subplots(1, 2)      # plot difference b/t ov and v
+    # all_vehicle_locs.set_xdata(loc)
+    # detailed_vehicle_locs.set_xdata(loc)
+    fig2, ax2 = plt.subplots(1, 1)      # plot x-t relation
+    fig3, ax3 = plt.subplots(2, 1)      # plot mean and std of velocity
+    fig4, ax4 = plt.subplots(1, 1)      # plot v-t relation
+    if dov_param.cmp_to_ov:
+        fig5, ax5 = plt.subplots(1, 2)      # plot difference b/t ov and v
 
-    # # plot x-t relation
-    # for n in xt_track_vehicle_range:
-    #     xt_track_single_vehicle_loc = np.copy(xt_track_vehicle_loc[:, n])
-    #     offset = np.zeros_like(xt_track_single_vehicle_loc)
-    #     for j in range(1, xt_track_single_vehicle_loc.shape[0]):
-    #         if xt_track_single_vehicle_loc[j] < xt_track_single_vehicle_loc[j-1]:
-    #             offset[j:] += D
-    #     xt_track_single_vehicle_loc += offset
+    # plot x-t relation
+    for n in xt_track_vehicle_range:
+        xt_track_single_vehicle_loc = np.copy(xt_track_vehicle_loc[:, n])
+        offset = np.zeros_like(xt_track_single_vehicle_loc)
+        for j in range(1, xt_track_single_vehicle_loc.shape[0]):
+            if xt_track_single_vehicle_loc[j] < xt_track_single_vehicle_loc[j-1]:
+                offset[j:] += D
+        xt_track_single_vehicle_loc += offset
 
-    #     ax2.plot(
-    #         np.linspace(0, T, total_step//xt_track_iteration_step), xt_track_single_vehicle_loc, label=f"Vehicle {n}")
+        ax2.plot(
+            np.linspace(0, T, total_step//xt_track_iteration_step), xt_track_single_vehicle_loc, label=f"Vehicle {n}")
 
-    # ax2.set_xlabel('Time (s)')
-    # ax2.set_ylabel('Location (m)')
-    # ax2.set_title('Location of vehicles')
-    # ax2.legend()
+    ax2.set_xlabel('Time (s)')
+    ax2.set_ylabel('Location (m)')
+    ax2.set_title('Location of vehicles')
+    ax2.legend()
 
-    # # plot mean(v)-t relation
-    # ax3[0].plot(
-    #     np.linspace(0, T, total_step//xt_track_iteration_step), metric_mean_velocity*MPS_TO_KMPH, label='Mean velocity')
-    # # plot min(v)-t relation
-    # ax3[0].plot(
-    #     np.linspace(0, T, total_step//xt_track_iteration_step), metric_min_velocity*MPS_TO_KMPH, label='Min velocity')
-    # # plot max(v)-t relation
-    # ax3[0].plot(
-    #     np.linspace(0, T, total_step//xt_track_iteration_step), metric_max_velocity*MPS_TO_KMPH, label='Max velocity')
-    # # vmax as reference
-    # ax3[0].plot(np.linspace(0, T, total_step//xt_track_iteration_step), np.ones(total_step//xt_track_iteration_step)*vmax*MPS_TO_KMPH, 'r--')   
-    # ax3[0].set_xlabel('Time (s)')
-    # ax3[0].set_ylabel('Velocity (km/h)')
-    # ax3[0].set_title('Velocity of vehicles')
-    # if dov_param.cmp_to_ov:
-    #     # mean of ov(t) (v(t) w/ tau=0) as reference
-    #     ax3[0].plot(np.linspace(0, T, total_step//xt_track_iteration_step), np.mean(metric_ov, axis=1)*MPS_TO_KMPH, 'g--', label='Mean ov(t) (v(t) w/ tau=0)')
+    # plot mean(v)-t relation
+    ax3[0].plot(
+        np.linspace(0, T, total_step//xt_track_iteration_step), metric_mean_velocity*MPS_TO_KMPH, label='Mean velocity')
+    # plot min(v)-t relation
+    ax3[0].plot(
+        np.linspace(0, T, total_step//xt_track_iteration_step), metric_min_velocity*MPS_TO_KMPH, label='Min velocity')
+    # plot max(v)-t relation
+    ax3[0].plot(
+        np.linspace(0, T, total_step//xt_track_iteration_step), metric_max_velocity*MPS_TO_KMPH, label='Max velocity')
+    # vmax as reference
+    ax3[0].plot(np.linspace(0, T, total_step//xt_track_iteration_step), np.ones(total_step//xt_track_iteration_step)*vmax*MPS_TO_KMPH, 'r--')   
+    ax3[0].set_xlabel('Time (s)')
+    ax3[0].set_ylabel('Velocity (km/h)')
+    ax3[0].set_title('Velocity of vehicles')
+    if dov_param.cmp_to_ov:
+        # mean of ov(t) (v(t) w/ tau=0) as reference
+        ax3[0].plot(np.linspace(0, T, total_step//xt_track_iteration_step), np.mean(metric_ov, axis=1)*MPS_TO_KMPH, 'g--', label='Mean ov(t) (v(t) w/ tau=0)')
 
-    # ax3[0].legend()
+    ax3[0].legend()
    
-    # # plot std(v)-t relation
-    # ax3[1].plot(
-    #     np.linspace(0, T, total_step//xt_track_iteration_step), metric_std_velocity*MPS_TO_KMPH)
-    # ax3[1].set_xlabel('Time (s)')
-    # ax3[1].set_ylabel('Std velocity (km/h)')
-    # ax3[1].set_title('Std velocity of vehicles')
+    # plot std(v)-t relation
+    ax3[1].plot(
+        np.linspace(0, T, total_step//xt_track_iteration_step), metric_std_velocity*MPS_TO_KMPH)
+    ax3[1].set_xlabel('Time (s)')
+    ax3[1].set_ylabel('Std velocity (km/h)')
+    ax3[1].set_title('Std velocity of vehicles')
     
-    # print(f"Mean velocity: {np.mean(v)*MPS_TO_KMPH:.2f}km/h")
+    print(f"Mean velocity: {np.mean(v)*MPS_TO_KMPH:.2f}km/h")
 
 
     # plot v-t relation
-    # for n in xt_track_vehicle_range[0:1]:
-    #     vt_track_single_vehicle_velocity = np.copy(vt_track_vehicle_velocity[:, n])
-    #     if dov_param.cmp_to_ov:
-    #         ax4.plot(
-    #             np.linspace(0, T, total_step//xt_track_iteration_step), metric_ov[:, n]*MPS_TO_KMPH, label=f"ov(t) of vehicle {n}")
-    #     ax4.plot(
-    #         np.linspace(0, T, total_step//xt_track_iteration_step), vt_track_single_vehicle_velocity*MPS_TO_KMPH, label=f"Vehicle {n}")
-    # ax4.set_xlabel('Time (s)')
-    # ax4.set_ylabel('Velocity (km/h)')
-    # ax4.set_title('Velocity of vehicles')
-    # ax4.legend()
+    for n in xt_track_vehicle_range[0:1]:
+        vt_track_single_vehicle_velocity = np.copy(vt_track_vehicle_velocity[:, n])
+        if dov_param.cmp_to_ov:
+            ax4.plot(
+                np.linspace(0, T, total_step//xt_track_iteration_step), metric_ov[:, n]*MPS_TO_KMPH, label=f"ov(t) of vehicle {n}")
+        ax4.plot(
+            np.linspace(0, T, total_step//xt_track_iteration_step), vt_track_single_vehicle_velocity*MPS_TO_KMPH, label=f"Vehicle {n}")
+    ax4.set_xlabel('Time (s)')
+    ax4.set_ylabel('Velocity (km/h)')
+    ax4.set_title('Velocity of vehicles')
+    ax4.legend()
 
-    # if dov_param.cmp_to_ov:
-    #     # # plot difference b/t ov and v of car #N//4
-    #     # ax5[0].plot(
-    #     #     np.linspace(0, T, total_step//xt_track_iteration_step), (metric_ov[:, n]-vt_track_vehicle_velocity[:, N//4])*MPS_TO_KMPH, label=f"Vehicle {n}")
-    #     # ax5[0].set_xlabel('Time (s)')
-    #     # ax5[0].set_ylabel('Difference (km/h)')
-    #     # ax5[0].set_title('Difference b/t ov and v')
-    #     # ax5[0].legend()
+    if dov_param.cmp_to_ov:
+        # # plot difference b/t ov and v of car #N//4
+        # ax5[0].plot(
+        #     np.linspace(0, T, total_step//xt_track_iteration_step), (metric_ov[:, n]-vt_track_vehicle_velocity[:, N//4])*MPS_TO_KMPH, label=f"Vehicle {n}")
+        # ax5[0].set_xlabel('Time (s)')
+        # ax5[0].set_ylabel('Difference (km/h)')
+        # ax5[0].set_title('Difference b/t ov and v')
+        # ax5[0].legend()
 
-    #     # # plot difference b/t ov and v of car #3*N//4
-    #     # ax5[1].plot(
-    #     #     np.linspace(0, T, total_step//xt_track_iteration_step), (metric_ov[:, n]-vt_track_vehicle_velocity[:, 3*N//4])*MPS_TO_KMPH, label=f"Vehicle {n}")
-    #     # ax5[1].set_xlabel('Time (s)')
-    #     # ax5[1].set_ylabel('Difference (km/h)')
-    #     # ax5[1].set_title('Difference b/t ov and v')
-    #     # ax5[1].legend()
-    #     for n in xt_track_vehicle_range:
-    #         ax5[0].plot(
-    #             np.linspace(0, T, total_step//xt_track_iteration_step), 
-    #             (metric_ov[:, n]-vt_track_vehicle_velocity[:, n])*MPS_TO_KMPH, 
-    #             label=f"Vehicle {n}")
-    #         ax5[0].set_xlabel('Time (s)')
-    #         ax5[0].set_ylabel('Difference (km/h)')
-    #         ax5[0].set_title('Difference b/t ov and v')
-    #         ax5[0].legend()
+        # # plot difference b/t ov and v of car #3*N//4
+        # ax5[1].plot(
+        #     np.linspace(0, T, total_step//xt_track_iteration_step), (metric_ov[:, n]-vt_track_vehicle_velocity[:, 3*N//4])*MPS_TO_KMPH, label=f"Vehicle {n}")
+        # ax5[1].set_xlabel('Time (s)')
+        # ax5[1].set_ylabel('Difference (km/h)')
+        # ax5[1].set_title('Difference b/t ov and v')
+        # ax5[1].legend()
+        for n in xt_track_vehicle_range:
+            ax5[0].plot(
+                np.linspace(0, T, total_step//xt_track_iteration_step), 
+                (metric_ov[:, n]-vt_track_vehicle_velocity[:, n])*MPS_TO_KMPH, 
+                label=f"Vehicle {n}")
+            ax5[0].set_xlabel('Time (s)')
+            ax5[0].set_ylabel('Difference (km/h)')
+            ax5[0].set_title('Difference b/t ov and v')
+            ax5[0].legend()
         
-    #     # plot difference b/t ov and v of a particular car
-    #     ax5[1].plot(
-    #         np.linspace(0, T, total_step//xt_track_iteration_step), 
-    #         (metric_ov[:, xt_track_vehicle_range[0]]-vt_track_vehicle_velocity[:, xt_track_vehicle_range[0]])*MPS_TO_KMPH, 
-    #         label=f"Vehicle {xt_track_vehicle_range[0]}")
-    #     ax5[1].set_xlabel('Time (s)')
-    #     ax5[1].set_ylabel('Difference (km/h)')
-    #     ax5[1].set_title(f'Difference b/t ov and v of car {xt_track_vehicle_range[0]}')
-    #     ax5[1].legend()
+        # plot difference b/t ov and v of a particular car
+        ax5[1].plot(
+            np.linspace(0, T, total_step//xt_track_iteration_step), 
+            (metric_ov[:, xt_track_vehicle_range[0]]-vt_track_vehicle_velocity[:, xt_track_vehicle_range[0]])*MPS_TO_KMPH, 
+            label=f"Vehicle {xt_track_vehicle_range[0]}")
+        ax5[1].set_xlabel('Time (s)')
+        ax5[1].set_ylabel('Difference (km/h)')
+        ax5[1].set_title(f'Difference b/t ov and v of car {xt_track_vehicle_range[0]}')
+        ax5[1].legend()
 
     plt.show()
 

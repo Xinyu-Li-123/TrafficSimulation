@@ -11,7 +11,7 @@ N = 50        # number of vehicles, N >= 2
 D = 1000           # length of the highway (m)        
 detail_range = (D//2 - 200, D//2 + 200) # range of the detailed plot
 T = 1000        # simulation time (s)
-dt = 0.0025       # time step (s
+dt = 0.01       # time step (s
 total_step = int(T/dt) # total number of steps
 
 
@@ -57,7 +57,7 @@ if N < xt_track_max_vehicle:
     xt_track_vehicle_range = np.arange(0, N, 1)
 else:
     xt_track_vehicle_range = np.linspace(0, N-1, xt_track_max_vehicle, dtype=int)
-xt_track_vehicle_range = np.array([5, 6, 7])
+# xt_track_vehicle_range = np.array([0, 1, 2, 3, 4, 5])
 
 # v-t tracking parameters
 vt_track_iteration_step = 100
