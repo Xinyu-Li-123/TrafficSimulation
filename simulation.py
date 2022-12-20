@@ -44,7 +44,9 @@ def update(i, draw_animation=True, detect_snake=False):
         print(f"{i+1}/{total_step}")
         print(f"Time: {(i+1)*dt:.2f}/{T:.2f}s")
         if draw_animation:
-            print(f"min(v)={v.min()*MPS_TO_KMPH:.2f}km/h, max(v)={v.max()*MPS_TO_KMPH:.2f}km/h, mean(v)={v.mean()*MPS_TO_KMPH:.2f}km/h")
+            pass 
+        print(f"min(v)={v.min()*MPS_TO_KMPH:.2f}km/h, max(v)={v.max()*MPS_TO_KMPH:.2f}km/h, mean(v)={v.mean()*MPS_TO_KMPH:.2f}km/h")
+        print(f"min(d)={d.min():.2f}m, max(d)={d.max():.2f}m, mean(d)={d.mean():.2f}m")
     elif i == 0:
         # print(f"d={d}") 
         # print(f"loc={loc}")
@@ -52,7 +54,9 @@ def update(i, draw_animation=True, detect_snake=False):
         print(f"{i}/{total_step}")
         print(f"Time: {(i+1)*dt:.2f}/{T:.2f}s")
         if draw_animation:
-            print(f"min(v)={v.min()*MPS_TO_KMPH:.2f}km/h, max(v)={v.max()*MPS_TO_KMPH:.2f}km/h, mean(v)={v.mean()*MPS_TO_KMPH:.2f}km/h")
+            pass 
+        print(f"min(v)={v.min()*MPS_TO_KMPH:.2f}km/h, max(v)={v.max()*MPS_TO_KMPH:.2f}km/h, mean(v)={v.mean()*MPS_TO_KMPH:.2f}km/h")
+        print(f"min(d)={d.min():.2f}m, max(d)={d.max():.2f}m, mean(d)={d.mean():.2f}m")
 
     if i == save_param_at_index:
         save_param(loc, d, v, a, save_param_filename)
@@ -115,8 +119,8 @@ print(f"\t{dov_param.dov_update_type} dov update type...\n")
 print(f"Running simulation with {N} vehicles, duration {T}s, {dt}s time step\n")
 
 # loc, d, v, a = dummy_initialize()
-loc, d, v, a = partial_highway_initialize()
-# loc, d, v, a = equidistant_initialize(jitter=0)
+# loc, d, v, a = partial_highway_initialize()
+loc, d, v, a = equidistant_initialize(jitter=0)
 # loc, d, v, a = record_initialize("param_50000.pkl")
 is_collided = False
 collision_step = -1
@@ -256,6 +260,12 @@ elif animation_demo_type == 'summary':
             metric_std_velocity[i//xt_track_iteration_step] = np.std(v)
             if dov_param.cmp_to_ov:
                 metric_ov[i//xt_track_iteration_step, :] = np.copy(dov.ov)
+    
+    print(f"Mean velocity: {np.mean(v)*MPS_TO_KMPH:.2f}km/h")
+    print("Mean distance: {:.2f}m".format(
+        np.mean(d)
+    ))
+
 
     # save vt_track_vehicle_velocity
     pickle.dump(vt_track_vehicle_velocity, open(f'./record/{dt}_v.pkl', 'wb'))
@@ -312,9 +322,6 @@ elif animation_demo_type == 'summary':
     ax3[1].set_xlabel('Time (s)')
     ax3[1].set_ylabel('Std velocity (km/h)')
     ax3[1].set_title('Std velocity of vehicles')
-    
-    print(f"Mean velocity: {np.mean(v)*MPS_TO_KMPH:.2f}km/h")
-
 
     # plot v-t relation
     for n in xt_track_vehicle_range[0:1]:

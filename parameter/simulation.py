@@ -20,7 +20,7 @@ animation_types = ['vehicles', 'vt']
 animation_type = animation_types[0]
 
 animation_demo_types = ['display', 'save', 'summary', "diy"]
-animation_demo_type = animation_demo_types[1]
+animation_demo_type = animation_demo_types[2]
 display_animation = animation_demo_type == 'display'    # show animation on screen
 save_animation = animation_demo_type == 'save'      # save animation to file
 draw_animation = display_animation or save_animation    # draw animation
@@ -48,7 +48,7 @@ else:
 
 
 speedup = 100
-info_step = 50000         # print information every info_step frames
+info_step = 10000         # print information every info_step frames
 
 # x-t tracking parameters
 xt_track_iteration_step = 10
