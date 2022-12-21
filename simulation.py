@@ -31,7 +31,7 @@ def init():
             return all_vehicle_velocities,
 
 #TODO: speed up animation by including multiple simulation iterations in one animation update
-def update(i, draw_animation=True, detect_snake=False):
+def update(i, draw_animation=True):
     global loc, d, v, a, is_collided, collision_step, collided_idx # , onroad_mask
     # fig.canvas.resize_event()
     if (i+1) % info_step == 0 or i == total_step:
@@ -45,8 +45,8 @@ def update(i, draw_animation=True, detect_snake=False):
         print(f"Time: {(i+1)*dt:.2f}/{T:.2f}s")
         if draw_animation:
             pass 
-        print(f"min(v)={v.min()*MPS_TO_KMPH:.2f}km/h, max(v)={v.max()*MPS_TO_KMPH:.2f}km/h, mean(v)={v.mean()*MPS_TO_KMPH:.2f}km/h")
-        print(f"min(d)={d.min():.2f}m, max(d)={d.max():.2f}m, mean(d)={d.mean():.2f}m")
+        print(f"min(v)={v.min()*MPS_TO_KMPH:.2f}km/h, max(v)={v.max()*MPS_TO_KMPH:.2f}km/h, mean(v)={v.mean()*MPS_TO_KMPH:.2f}km/h, std(v)={v.std()*MPS_TO_KMPH:.2f}km/h")
+        print(f"min(d)={d.min():.2f}m, max(d)={d.max():.2f}m, mean(d)={d.mean():.2f}m, std(d)={d.std():.2f}m")
     elif i == 0:
         # print(f"d={d}") 
         # print(f"loc={loc}")
@@ -55,8 +55,8 @@ def update(i, draw_animation=True, detect_snake=False):
         print(f"Time: {(i+1)*dt:.2f}/{T:.2f}s")
         if draw_animation:
             pass 
-        print(f"min(v)={v.min()*MPS_TO_KMPH:.2f}km/h, max(v)={v.max()*MPS_TO_KMPH:.2f}km/h, mean(v)={v.mean()*MPS_TO_KMPH:.2f}km/h")
-        print(f"min(d)={d.min():.2f}m, max(d)={d.max():.2f}m, mean(d)={d.mean():.2f}m")
+        print(f"min(v)={v.min()*MPS_TO_KMPH:.2f}km/h, max(v)={v.max()*MPS_TO_KMPH:.2f}km/h, mean(v)={v.mean()*MPS_TO_KMPH:.2f}km/h, std(v)={v.std()*MPS_TO_KMPH:.2f}km/h")
+        print(f"min(d)={d.min():.2f}m, max(d)={d.max():.2f}m, mean(d)={d.mean():.2f}m, std(d)={d.std():.2f}m")
 
     if i == save_param_at_index:
         save_param(loc, d, v, a, save_param_filename)
@@ -74,7 +74,12 @@ def update(i, draw_animation=True, detect_snake=False):
     # traffic snake detection:
     if detect_snake:
         # find out all v that is less than SMALLNUM
-        pass 
+        small_v = v < 100
+        # small_v = v < snake_max_distance    
+        # all_vehicle_locs[small_v].set_color('r')
+        # all_vehicle_locs[np.logical_not(small_v)].set_color('b')
+        # detailed_vehicle_locs[small_v].set_color('r')
+        # detailed_vehicle_locs[np.logical_not(small_v)].set_color('b')
 
     # collision detection  
     if check_collision(d):
@@ -119,8 +124,8 @@ print(f"\t{dov_param.dov_update_type} dov update type...\n")
 print(f"Running simulation with {N} vehicles, duration {T}s, {dt}s time step\n")
 
 # loc, d, v, a = dummy_initialize()
-# loc, d, v, a = partial_highway_initialize()
-loc, d, v, a = equidistant_initialize(jitter=0)
+loc, d, v, a = partial_highway_initialize()
+# loc, d, v, a = equidistant_initialize(jitter=init_jitter)
 # loc, d, v, a = record_initialize("param_50000.pkl")
 is_collided = False
 collision_step = -1
@@ -178,6 +183,7 @@ if draw_animation:
 
         # plot location of vehicles
         # scatter with alternating colors of red and blue
+
         all_vehicle_locs, = ax[0].plot(
             loc, 
             np.ones(N) * LANE_WIDTH / 2, 
