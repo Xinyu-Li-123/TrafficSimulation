@@ -19,7 +19,7 @@ from model.update import dummy
 from model.update import dov
 from model.initialize import *
 
-from utils.utils import check_collision, save_param
+from utils.utils import check_collision, save_param, fit_piecewise_linear
 
 
 def init():
@@ -67,7 +67,7 @@ def update(i, draw_animation=True):
     dov.dov_update(loc, d, v, a, i, dov_update_type=dov_param.dov_update_type)
     
     if detect_snake:
-        snake_range[:] = v < SMALLNUM
+        snake_range[:] = v < snake_vehicle_max_velocity
 
     if draw_animation:
 
@@ -149,7 +149,7 @@ loc, d, v, a = partial_highway_initialize()
 
 if detect_snake:
     snake_range = np.zeros(N, dtype=bool)
-    snake_range[:] = v < SMALLNUM
+    snake_range[:] = v < snake_vehicle_max_velocity
     
 is_collided = False
 collision_step = -1
@@ -297,7 +297,7 @@ elif animation_demo_type == 'summary':
     if detect_snake:
         snake_count = np.zeros(total_step//xt_track_iteration_step)
         snake_length = np.zeros(total_step//xt_track_iteration_step)
-        snake_velocity = np.zeros(total_step//xt_track_iteration_step)
+        snake_velocity = np.zeros(total_step//xt_track_iteration_step-1)
     
     if dov_param.cmp_to_ov:
         metric_ov = np.zeros((total_step//xt_track_iteration_step, N))
@@ -318,20 +318,18 @@ elif animation_demo_type == 'summary':
             if detect_snake:
                 if np.sum(snake_range) > 1:
                     snake_count[i//xt_track_iteration_step] = np.sum(snake_range)
-
                     snake_length[i//xt_track_iteration_step] = np.sum(d[snake_range]) - np.max(d[snake_range])
-                    
-                    snake_velocity[i//xt_track_iteration_step] = np.sum(snake_range)
                 else:
                     snake_count[i//xt_track_iteration_step] = 0
                     snake_length[i//xt_track_iteration_step] = 0
-                    snake_velocity[i//xt_track_iteration_step] = 0
 
     print(f"Mean velocity: {np.mean(v)*MPS_TO_KMPH:.2f}km/h")
     print("Mean distance: {:.2f}m".format(
         np.mean(d)
     ))
 
+    if detect_snake:
+        snake_velocity = np.diff(snake_length) / (dt*xt_track_iteration_step)
 
     # save vt_track_vehicle_velocity
     pickle.dump(vt_track_vehicle_velocity, open(f'./record/{dt}_v.pkl', 'wb'))
@@ -428,16 +426,52 @@ elif animation_demo_type == 'summary':
         ax5[1].legend()
 
     if detect_snake:
-        # plot snake detection
-        ax6[0].plot(
+        # plot snake length
+        ax6[0].scatter(
             np.linspace(0, T, total_step//xt_track_iteration_step), 
             snake_length, 
             label=f"Snake length",
-            linewidth=1,)
+            s=1,)
+        # fit snake length
+        my_pwlf, breaks = fit_piecewise_linear(
+                np.linspace(0, T, total_step//xt_track_iteration_step),
+                snake_length, 4)
+        
+        pred_y = my_pwlf.predict(np.linspace(0, T, total_step//xt_track_iteration_step))
+
+        ## print slopes of piecewise linear fit
+        growth_rates = np.zeros(len(breaks)-1)
+        for i in range(len(breaks)-1):
+            growth_rates[i] = \
+                (my_pwlf.predict(breaks[i+1])[0]-my_pwlf.predict(breaks[i])[0])/(breaks[i+1]-breaks[i])*MPS_TO_KMPH
+            print("Velocity of snake: {:.2f}km/h at time {:.2f}-{:.2f}".format(
+                growth_rates[i],
+                breaks[i], breaks[i+1]
+            ))
+
+        ax6[0].plot(
+            np.linspace(0, T, total_step//xt_track_iteration_step),
+            pred_y,
+            'r--',
+            label=f"Snake length fit")
+
         ax6[0].set_xlabel('Time (s)')
-        ax6[0].set_ylabel('length (#vehicles)')
+        ax6[0].set_ylabel('length (m)')
         ax6[0].set_title('Snake lengths')
         ax6[0].legend()
+
+        # use breaks to plot fitted snake length with velocity label
+        
+        ax6[1].plot(breaks, my_pwlf.predict(breaks))
+
+        # ## write text to plot
+        # for i in range(len(breaks)-1):
+        #     ax6[1].text(
+        #         (breaks[i+1]+breaks[i])/2,
+        #         (pred_y[i+1]+pred_y[i])/2,
+        #         "{:.2f}km/h".format(growth_rates[i]),
+        #         fontsize=8,
+        #         color='b')
 
     plt.show()
 

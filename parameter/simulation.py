@@ -6,12 +6,13 @@ Parameters to
 
 import numpy as np
 from parameter.vehicle import car_length
+from parameter.model import dov_param
 
 # numeerical parameters
 N = 50        # number of vehicles, N >= 2   
 D = 1000           # length of the highway (m)        
 detail_range = (D//2 - 200, D//2 + 200) # range of the detailed plot
-T = 2000        # simulation time (s)
+T = 1000        # simulation time (s)
 dt = 0.01       # time step (s
 total_step = int(T/dt) # total number of steps
 init_jitter = 0
@@ -21,14 +22,17 @@ animation_types = ['vehicles', 'vt']
 animation_type = animation_types[0]
 
 animation_demo_types = ['display', 'save', 'summary', "diy"]
-animation_demo_type = animation_demo_types[0]
+animation_demo_type = animation_demo_types[2]
 display_animation = animation_demo_type == 'display'    # show animation on screen
 save_animation = animation_demo_type == 'save'      # save animation to file
 draw_animation = display_animation or save_animation    # draw animation
 animation_name = "ani_xt_congestion"
 animation_start_index = 0       # start animation at this step
-detect_snake = True
-snake_max_distance = 2*car_length     # maximum distance between two vehicles to be considered in a snake
+
+## snake detection parameters
+detect_snake = False
+snake_max_distance = dov_param.dmin     # maximum distance between two vehicles to be considered in a snake
+snake_vehicle_max_velocity = 1
 
 # save parameters
 save_param_at_index = -1    # save parameters at this step

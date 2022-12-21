@@ -8,6 +8,7 @@ and files in parameter should not import any files in module utils
 import numpy as np
 import pickle
 import os
+import pwlf
 
 from parameter.vehicle import *
 from parameter.simulation import *
@@ -73,3 +74,11 @@ def save_param(loc, d, v, a, path):
     path = os.path.join('record', path)
     with open(path, 'wb') as f:
         pickle.dump((loc, d, v, a), f)
+
+def fit_piecewise_linear(x, y, count):
+    """
+    Fit a piecewise linear function to the given data.
+    """
+    my_pwlf = pwlf.PiecewiseLinFit(x, y)
+    breaks = my_pwlf.fit(count)
+    return my_pwlf, breaks
