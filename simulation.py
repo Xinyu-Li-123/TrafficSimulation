@@ -297,7 +297,8 @@ elif animation_demo_type == 'summary':
     if detect_snake:
         snake_count = np.zeros(total_step//xt_track_iteration_step)
         snake_length = np.zeros(total_step//xt_track_iteration_step)
-        snake_velocity = np.zeros(total_step//xt_track_iteration_step-1)
+        growth_rates = np.zeros(total_step//xt_track_iteration_step-1)
+        snake_velocity = np.zeros((total_step//xt_track_iteration_step, 2)) # v of front and end
     
     if dov_param.cmp_to_ov:
         metric_ov = np.zeros((total_step//xt_track_iteration_step, N))
@@ -317,8 +318,44 @@ elif animation_demo_type == 'summary':
                 metric_ov[i//xt_track_iteration_step, :] = np.copy(dov.ov)
             if detect_snake:
                 if np.sum(snake_range) > 1:
+                    # calculate the start and end indices of snake using snake_range
+                    
+                    terminal_indices = np.where(
+                        (np.logical_xor(
+                            np.roll(snake_range, -1), snake_range)
+                            ))[0]
+                    if len(terminal_indices) > 1:
+                        # print(terminal_indices, end="\t")
+                        # print(loc[terminal_indices])
+                        # print(
+                        #     (snake_range[(terminal_indices[0]-1)%N], snake_range[terminal_indices[0]], snake_range[(terminal_indices[0]+1)%N]),
+                        #     (snake_range[(terminal_indices[1]-1)%N], snake_range[terminal_indices[1]], snake_range[(terminal_indices[1]+1)%N]),
+                        # )
+
+                        if snake_range[terminal_indices[0]+1]%N:
+                            front = terminal_indices[1]
+                            end = (terminal_indices[0]+1)%N                        
+                            # print("case 1: ", front, end)
+                        else:
+                            front = terminal_indices[0]
+                            end = (terminal_indices[1]+1)%N
+                        #     print("case 2: ", front, end)
+                        # print("{:.4f}".format((loc[front]-loc[end])%D))
+                    elif len(terminal_indices) == 1:
+                        front = terminal_indices[0]
+                        end = (terminal_indices[0]+1)%N
+                    else:
+                        front = 0
+                        end = 0
+                        
+
+                    # print(terminal_indices[0], 
+                    #       terminal_indices[1])
+
                     snake_count[i//xt_track_iteration_step] = np.sum(snake_range)
-                    snake_length[i//xt_track_iteration_step] = np.sum(d[snake_range]) - np.max(d[snake_range])
+                    snake_length[i//xt_track_iteration_step] = (loc[front]-loc[end])%D
+                    snake_velocity[i//xt_track_iteration_step, 0] = v[front]
+                    snake_velocity[i//xt_track_iteration_step, 1] = v[end]
                 else:
                     snake_count[i//xt_track_iteration_step] = 0
                     snake_length[i//xt_track_iteration_step] = 0
@@ -329,7 +366,7 @@ elif animation_demo_type == 'summary':
     ))
 
     if detect_snake:
-        snake_velocity = np.diff(snake_length) / (dt*xt_track_iteration_step)
+        growth_rates = np.diff(snake_length) / (dt*xt_track_iteration_step)
 
     # save vt_track_vehicle_velocity
     pickle.dump(vt_track_vehicle_velocity, open(f'./record/{dt}_v.pkl', 'wb'))
@@ -440,14 +477,14 @@ elif animation_demo_type == 'summary':
         pred_y = my_pwlf.predict(np.linspace(0, T, total_step//xt_track_iteration_step))
 
         ## print slopes of piecewise linear fit
-        growth_rates = np.zeros(len(breaks)-1)
-        for i in range(len(breaks)-1):
-            growth_rates[i] = \
-                (my_pwlf.predict(breaks[i+1])[0]-my_pwlf.predict(breaks[i])[0])/(breaks[i+1]-breaks[i])*MPS_TO_KMPH
-            print("Velocity of snake: {:.2f}km/h at time {:.2f}-{:.2f}".format(
-                growth_rates[i],
-                breaks[i], breaks[i+1]
-            ))
+        # growth_rates = np.zeros(len(breaks)-1)
+        # for i in range(len(breaks)-1):
+        #     growth_rates[i] = \
+        #         (my_pwlf.predict(breaks[i+1])[0]-my_pwlf.predict(breaks[i])[0])/(breaks[i+1]-breaks[i])*MPS_TO_KMPH
+        #     print("Velocity of snake: {:.2f}km/h at time {:.2f}-{:.2f}".format(
+        #         growth_rates[i],
+        #         breaks[i], breaks[i+1]
+        #     ))
 
         ax6[0].plot(
             np.linspace(0, T, total_step//xt_track_iteration_step),
@@ -456,13 +493,27 @@ elif animation_demo_type == 'summary':
             label=f"Snake length fit")
 
         ax6[0].set_xlabel('Time (s)')
-        ax6[0].set_ylabel('length (m)')
+        ax6[0].set_ylabel('velocity (km/h)')
         ax6[0].set_title('Snake lengths')
         ax6[0].legend()
 
         # use breaks to plot fitted snake length with velocity label
-        
-        ax6[1].plot(breaks, my_pwlf.predict(breaks))
+        # ax6[1].plot(breaks, my_pwlf.predict(breaks))
+        # ax6[1].scatter(np.linspace(0, T, len(growth_rates)), growth_rates)
+
+        ax6[1].scatter(
+            np.linspace(0, T, total_step//xt_track_iteration_step),
+            snake_velocity[:,0]*MPS_TO_KMPH,
+            label=f"Snake front velocity")
+        ax6[1].scatter(
+            np.linspace(0, T, total_step//xt_track_iteration_step),
+            snake_velocity[:,1]*MPS_TO_KMPH,
+            label=f"Snake rear velocity")
+        ax6[1].set_xlabel('Time (s)')
+        ax6[1].set_ylabel('Velocity (km/h)')
+        ax6[1].set_title('Snake velocity')
+        ax6[1].legend()
+
 
         # ## write text to plot
         # for i in range(len(breaks)-1):

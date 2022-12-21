@@ -12,7 +12,7 @@ from parameter.model import dov_param
 N = 50        # number of vehicles, N >= 2   
 D = 1000           # length of the highway (m)        
 detail_range = (D//2 - 200, D//2 + 200) # range of the detailed plot
-T = 1000        # simulation time (s)
+T = 500       # simulation time (s)
 dt = 0.01       # time step (s
 total_step = int(T/dt) # total number of steps
 init_jitter = 0
@@ -30,7 +30,7 @@ animation_name = "ani_xt_congestion"
 animation_start_index = 0       # start animation at this step
 
 ## snake detection parameters
-detect_snake = False
+detect_snake = True
 snake_max_distance = dov_param.dmin     # maximum distance between two vehicles to be considered in a snake
 snake_vehicle_max_velocity = 1
 

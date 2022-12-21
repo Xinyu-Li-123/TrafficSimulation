@@ -90,8 +90,8 @@ def plot_at(ji, ti):
     print(f"Running simulation with {N} vehicles, duration {T}s, {dt}s time step\n")
 
     # loc, d, v, a = dummy_initialize()
-    # loc, d, v, a = partial_highway_initialize()
-    loc, d, v, a = equidistant_initialize(jitter=init_jitter)
+    loc, d, v, a = partial_highway_initialize()
+    # loc, d, v, a = equidistant_initialize(jitter=init_jitter)
     # loc, d, v, a = record_initialize("param_50000.pkl")
 
     is_collided = False
@@ -130,33 +130,24 @@ def plot_at(ji, ti):
     # plot mean(v)-t relation
     ax3[ji,ti].plot(
         np.linspace(0, T, total_step//xt_track_iteration_step), metric_mean_velocity*MPS_TO_KMPH, label='Mean velocity')
-    
     # plot min(v)-t relation
     ax3[ji,ti].plot(
         np.linspace(0, T, total_step//xt_track_iteration_step), metric_min_velocity*MPS_TO_KMPH, label='Min velocity')
-    
     # plot max(v)-t relation
     ax3[ji,ti].plot(
         np.linspace(0, T, total_step//xt_track_iteration_step), metric_max_velocity*MPS_TO_KMPH, label='Max velocity')
-    
     # vmax as reference
     ax3[ji,ti].plot(np.linspace(0, T, total_step//xt_track_iteration_step), np.ones(total_step//xt_track_iteration_step)*vmax*MPS_TO_KMPH, 'r--')   
     # ax3[ji,ti].set_xlabel('Time (s)')
     # ax3[ji,ti].set_ylabel('Velocity (km/h)')
-
-    # ve as reference
-    dov._compute_optimal_velocity(d, dov_param.dov_update_types[dov_param.dov_update_type])
-    ax3[ji,ti].plot(
-        np.linspace(0, T, total_step//xt_track_iteration_step), 
-        np.ones(total_step//xt_track_iteration_step)*dov.ov[0]*MPS_TO_KMPH, 'b--')
     ax3[ji,ti].set_title('Jitter={:.2f}, tau={:.2f}'.format(init_jitter, dov_param.tau))
 
     if (ji, ti) == (0, 0):
         ax3[ji,ti].legend()
 
 
-
-loc, d, v, a = equidistant_initialize(jitter=init_jitter)
+lov, d, v, a = partial_highway_initialize()
+# loc, d, v, a = equidistant_initialize(jitter=init_jitter)
 
 jitters = np.array([0.0, 2, 4])
 taus = np.array([0.1, 0.5, 1.0])
@@ -167,16 +158,77 @@ fig3, ax3 = plt.subplots(3, 3, figsize=(12,10))      # plot mean and std of velo
 # set hspace
 plt.subplots_adjust(hspace=0.3)
 
-ve = dov
+test_count = 3
+dmins = np.zeros(test_count)
+dmaxs = np.zeros(test_count)
 
-for ji in range(jitters.size):
-    for ti in range(taus.size):
-        init_jitter = jitters[ji]
-        dov_param.tau = taus[ti]
-        print((ji, ti))
-        plot_at(ji, ti)
 
-# save the figure
-print("Saving the figure...")
+# test 1
+# dov_param.dmin =  0.2 + car_length*3 
+# dov_param.dmax =  50 + car_length*3
+# de = D/N
+# dmins[0] = dov_param.dmin
+# dmaxs[0] = dov_param.dmax
+# vmax = vmax
+# dov._compute_optimal_velocity(np.ones(N)*de, dov_param.dov_update_types[0])
+# ve = dov.ov[0]
+# print(dmins[0], dmaxs[0], ve*MPS_TO_KMPH)
+
+# dmins[1] = dov_param.dmin-1.174952
+# dmaxs[1] = dov_param.dmax+20
+# vmax = vmax
+# dov._compute_optimal_velocity(np.ones(N)*de, dov_param.dov_update_types[0])
+# ve = dov.ov[0]
+# print(dmins[1], dmaxs[1], ve*MPS_TO_KMPH)
+
+# dmins[2] = dov_param.dmin+0.790767
+# dmaxs[2] = dov_param.dmax-10
+# vmax = vmax
+# dov._compute_optimal_velocity(np.ones(N)*de, dov_param.dov_update_types[0])
+# ve = dov.ov[0]
+# print(dmins[2], dmaxs[2], ve*MPS_TO_KMPH)
+
+# for i in range(test_count):
+#     dov_param.dmin = dmins[i]
+#     dov_param.dmax = dmaxs[i]
+
+#     plot_at(i, 0)
+
+# plt.show()
+# # fig3.savefig('results/jitter-tau.svg')
+
+dov_param.dmin =  0.2 + car_length*3 
+dov_param.dmax = 80 + car_length*3
+de = D/N
+dmins[0] = dov_param.dmin
+dmaxs[0] = dov_param.dmax
+vmax = vmax
+dov._compute_optimal_velocity(np.ones(N)*de, dov_param.dov_update_types[0])
+ve = dov.ov[0]
+print(dmins[0], dmaxs[0], ve*MPS_TO_KMPH)
+
+dmins[1] = dov_param.dmin-1.174952
+dmaxs[1] = dov_param.dmax+20
+dov_param.dmin = dmins[1]
+dov_param.dmax = dmaxs[1]
+vmax = vmax
+dov._compute_optimal_velocity(np.ones(N)*de, dov_param.dov_update_types[0])
+ve = dov.ov[0]
+print(dmins[1], dmaxs[1], ve*MPS_TO_KMPH)
+
+dmins[2] = dov_param.dmin+0.790767
+dmaxs[2] = dov_param.dmax-10
+dov_param.dmin = dmins[2]
+dov_param.dmax = dmaxs[2]
+vmax = vmax
+dov._compute_optimal_velocity(np.ones(N)*de, dov_param.dov_update_types[0])
+ve = dov.ov[0]
+print(dmins[2], dmaxs[2], ve*MPS_TO_KMPH)
+
+for i in range(test_count):
+    dov_param.dmin = dmins[i]
+    dov_param.dmax = dmaxs[i]
+
+    plot_at(i, 0)
 plt.show()
-# fig3.savefig('results/jitter-tau.svg')
+# # fig3.savefig('results/jitter-tau.svg')
