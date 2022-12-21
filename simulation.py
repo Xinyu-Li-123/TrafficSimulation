@@ -26,8 +26,12 @@ def init():
 
     if draw_animation:
         if animation_type == 'vehicles':
+            if detect_snake:
+                return all_vehicle_locs, all_snake_locs, detailed_vehicle_locs, detailed_snake_locs
             return all_vehicle_locs, detailed_vehicle_locs
         elif animation_type == 'vt':
+            if detect_snake:
+                return all_vehicle_velocities, all_snake_velocities
             return all_vehicle_velocities,
 
 #TODO: speed up animation by including multiple simulation iterations in one animation update
@@ -43,38 +47,49 @@ def update(i, draw_animation=True):
         # print(f"mean(v)={v.mean()*MPS_TO_KMPH}, max(v)={v.max()*MPS_TO_KMPH}, min(v)={v.min()*MPS_TO_KMPH}")
         print(f"{i+1}/{total_step}")
         print(f"Time: {(i+1)*dt:.2f}/{T:.2f}s")
-        if draw_animation:
-            pass 
-        print(f"min(v)={v.min()*MPS_TO_KMPH:.2f}km/h, max(v)={v.max()*MPS_TO_KMPH:.2f}km/h, mean(v)={v.mean()*MPS_TO_KMPH:.2f}km/h, std(v)={v.std()*MPS_TO_KMPH:.2f}km/h")
-        print(f"min(d)={d.min():.2f}m, max(d)={d.max():.2f}m, mean(d)={d.mean():.2f}m, std(d)={d.std():.2f}m")
+        if not draw_animation:
+            print(f"min(v)={v.min()*MPS_TO_KMPH:.2f}km/h, max(v)={v.max()*MPS_TO_KMPH:.2f}km/h, mean(v)={v.mean()*MPS_TO_KMPH:.2f}km/h, std(v)={v.std()*MPS_TO_KMPH:.2f}km/h")
+            print(f"min(d)={d.min():.2f}m, max(d)={d.max():.2f}m, mean(d)={d.mean():.2f}m, std(d)={d.std():.2f}m")
     elif i == 0:
         # print(f"d={d}") 
         # print(f"loc={loc}")
         # print(f"v={v*MPS_TO_KMPH}")
         print(f"{i}/{total_step}")
         print(f"Time: {(i+1)*dt:.2f}/{T:.2f}s")
-        if draw_animation:
-            pass 
-        print(f"min(v)={v.min()*MPS_TO_KMPH:.2f}km/h, max(v)={v.max()*MPS_TO_KMPH:.2f}km/h, mean(v)={v.mean()*MPS_TO_KMPH:.2f}km/h, std(v)={v.std()*MPS_TO_KMPH:.2f}km/h")
-        print(f"min(d)={d.min():.2f}m, max(d)={d.max():.2f}m, mean(d)={d.mean():.2f}m, std(d)={d.std():.2f}m")
+        if not draw_animation:
+            print(f"min(v)={v.min()*MPS_TO_KMPH:.2f}km/h, max(v)={v.max()*MPS_TO_KMPH:.2f}km/h, mean(v)={v.mean()*MPS_TO_KMPH:.2f}km/h, std(v)={v.std()*MPS_TO_KMPH:.2f}km/h")
+            print(f"min(d)={d.min():.2f}m, max(d)={d.max():.2f}m, mean(d)={d.mean():.2f}m, std(d)={d.std():.2f}m")
 
     if i == save_param_at_index:
         save_param(loc, d, v, a, save_param_filename)
         print(f"At {i}/{total_step}, Saved parameters to {save_param_filename}")    # dummy.dummpy_update(loc, d, v, a) 
 
     dov.dov_update(loc, d, v, a, i, dov_update_type=dov_param.dov_update_type)
+    
+    if detect_snake:
+        snake_range[:] = v < SMALLNUM
 
     if draw_animation:
+
         if animation_type == 'vehicles':            
             all_vehicle_locs.set_xdata(loc)
             detailed_vehicle_locs.set_xdata(loc)
+            if detect_snake:
+                all_snake_locs.set_xdata(loc[snake_range])
+                all_snake_locs.set_ydata(np.ones(N)[snake_range] * LANE_WIDTH / 2)
+                detailed_snake_locs.set_xdata(loc[snake_range])
+                detailed_snake_locs.set_ydata(np.ones(N)[snake_range] * LANE_WIDTH / 2)
+                
+
         elif animation_type == 'vt':
+            if detect_snake:
+                all_snake_velocities.set_xdata(np.arange(0, N)[snake_range])
+                all_snake_velocities.set_ydata(v[snake_range]*MPS_TO_KMPH)
             all_vehicle_velocities.set_ydata(v*MPS_TO_KMPH)
 
     # traffic snake detection:
-    if detect_snake:
+   
         # find out all v that is less than SMALLNUM
-        small_v = v < 100
         # small_v = v < snake_max_distance    
         # all_vehicle_locs[small_v].set_color('r')
         # all_vehicle_locs[np.logical_not(small_v)].set_color('b')
@@ -113,8 +128,12 @@ def update(i, draw_animation=True):
 
     if draw_animation:
         if animation_type == 'vehicles':
+            if detect_snake:
+                return all_vehicle_locs, all_snake_locs, detailed_vehicle_locs, detailed_snake_locs
             return all_vehicle_locs, detailed_vehicle_locs
         elif animation_type == 'vt':
+            if detect_snake:
+                return all_vehicle_velocities, all_snake_velocities
             return all_vehicle_velocities,
 
 # Print Settings
@@ -127,6 +146,11 @@ print(f"Running simulation with {N} vehicles, duration {T}s, {dt}s time step\n")
 loc, d, v, a = partial_highway_initialize()
 # loc, d, v, a = equidistant_initialize(jitter=init_jitter)
 # loc, d, v, a = record_initialize("param_50000.pkl")
+
+if detect_snake:
+    snake_range = np.zeros(N, dtype=bool)
+    snake_range[:] = v < SMALLNUM
+    
 is_collided = False
 collision_step = -1
 collided_idx = -1
@@ -187,13 +211,27 @@ if draw_animation:
         all_vehicle_locs, = ax[0].plot(
             loc, 
             np.ones(N) * LANE_WIDTH / 2, 
-            marker="o", markersize=1, ls="None",)
+            marker="o", markersize=1, ls="None", color="lime")
+ 
         # for i in range(N):
         #     all_vehicle_locs.set_color(color[i])
         detailed_vehicle_locs, = ax[1].plot(
             loc, 
             np.ones(N) * LANE_WIDTH/2,
-            marker="o", markersize= np.min([5, 5 / ((detail_range[1]-detail_range[0])/200)]), ls="None")
+            marker="o", markersize= np.max([5, 5 / ((detail_range[1]-detail_range[0])/200)]), 
+            ls="None", color="lime")
+
+        if detect_snake: 
+            all_snake_locs, = ax[0].plot(
+                loc[snake_range],
+                np.ones(N)[snake_range] * LANE_WIDTH / 2,
+                marker="o", markersize=1, ls="None", color="r")
+            
+            detailed_snake_locs, = ax[1].plot(
+                loc[snake_range],
+                np.ones(N)[snake_range] * LANE_WIDTH / 2,
+                marker="o", markersize= np.max([5, 5 / ((detail_range[1]-detail_range[0])/200)]), 
+                ls="None", color="r")
 
         # Print parameters
         print("Simulation time: {}s\ndt: {:.2f}s\n#Update: {}\nAnimation speedup: {}".format(
@@ -218,7 +256,13 @@ if draw_animation:
 
         all_vehicle_velocities, = ax.plot(
             np.arange(N), v*MPS_TO_KMPH,
-            marker="o", markersize=5, markerfacecolor='r')
+            marker="o", markersize=5, markerfacecolor='lime',)
+
+        if detect_snake:
+            all_snake_velocities, = ax.plot(
+                np.arange(N)[snake_range], v[snake_range]*MPS_TO_KMPH,
+                marker="o", markersize=5, markerfacecolor='r', ls="None",)
+
 
         ax.set_xlim(-1, N*1.1)
         ax.set_ylim(-1, vmax*1.1*MPS_TO_KMPH)
@@ -250,6 +294,11 @@ elif animation_demo_type == 'summary':
     metric_min_velocity = np.zeros(total_step//xt_track_iteration_step)
     metric_max_velocity = np.zeros(total_step//xt_track_iteration_step)
     metric_std_velocity = np.zeros(total_step//xt_track_iteration_step)
+    if detect_snake:
+        snake_count = np.zeros(total_step//xt_track_iteration_step)
+        snake_length = np.zeros(total_step//xt_track_iteration_step)
+        snake_velocity = np.zeros(total_step//xt_track_iteration_step)
+    
     if dov_param.cmp_to_ov:
         metric_ov = np.zeros((total_step//xt_track_iteration_step, N))
 
@@ -266,7 +315,18 @@ elif animation_demo_type == 'summary':
             metric_std_velocity[i//xt_track_iteration_step] = np.std(v)
             if dov_param.cmp_to_ov:
                 metric_ov[i//xt_track_iteration_step, :] = np.copy(dov.ov)
-    
+            if detect_snake:
+                if np.sum(snake_range) > 1:
+                    snake_count[i//xt_track_iteration_step] = np.sum(snake_range)
+
+                    snake_length[i//xt_track_iteration_step] = np.sum(d[snake_range]) - np.max(d[snake_range])
+                    
+                    snake_velocity[i//xt_track_iteration_step] = np.sum(snake_range)
+                else:
+                    snake_count[i//xt_track_iteration_step] = 0
+                    snake_length[i//xt_track_iteration_step] = 0
+                    snake_velocity[i//xt_track_iteration_step] = 0
+
     print(f"Mean velocity: {np.mean(v)*MPS_TO_KMPH:.2f}km/h")
     print("Mean distance: {:.2f}m".format(
         np.mean(d)
@@ -281,9 +341,13 @@ elif animation_demo_type == 'summary':
     fig2, ax2 = plt.subplots(1, 1)      # plot x-t relation
     fig3, ax3 = plt.subplots(2, 1)      # plot mean and std of velocity
     fig4, ax4 = plt.subplots(1, 1)      # plot v-t relation
+    
     if dov_param.cmp_to_ov:
         fig5, ax5 = plt.subplots(1, 2)      # plot difference b/t ov and v
-
+    
+    if detect_snake:
+        fig6, ax6 = plt.subplots(1, 2)      # plot how length of snake and velocity of snake change
+    
     # plot x-t relation
     for n in xt_track_vehicle_range:
         xt_track_single_vehicle_loc = np.copy(xt_track_vehicle_loc[:, n])
@@ -343,21 +407,6 @@ elif animation_demo_type == 'summary':
     ax4.legend()
 
     if dov_param.cmp_to_ov:
-        # # plot difference b/t ov and v of car #N//4
-        # ax5[0].plot(
-        #     np.linspace(0, T, total_step//xt_track_iteration_step), (metric_ov[:, n]-vt_track_vehicle_velocity[:, N//4])*MPS_TO_KMPH, label=f"Vehicle {n}")
-        # ax5[0].set_xlabel('Time (s)')
-        # ax5[0].set_ylabel('Difference (km/h)')
-        # ax5[0].set_title('Difference b/t ov and v')
-        # ax5[0].legend()
-
-        # # plot difference b/t ov and v of car #3*N//4
-        # ax5[1].plot(
-        #     np.linspace(0, T, total_step//xt_track_iteration_step), (metric_ov[:, n]-vt_track_vehicle_velocity[:, 3*N//4])*MPS_TO_KMPH, label=f"Vehicle {n}")
-        # ax5[1].set_xlabel('Time (s)')
-        # ax5[1].set_ylabel('Difference (km/h)')
-        # ax5[1].set_title('Difference b/t ov and v')
-        # ax5[1].legend()
         for n in xt_track_vehicle_range:
             ax5[0].plot(
                 np.linspace(0, T, total_step//xt_track_iteration_step), 
@@ -377,6 +426,18 @@ elif animation_demo_type == 'summary':
         ax5[1].set_ylabel('Difference (km/h)')
         ax5[1].set_title(f'Difference b/t ov and v of car {xt_track_vehicle_range[0]}')
         ax5[1].legend()
+
+    if detect_snake:
+        # plot snake detection
+        ax6[0].plot(
+            np.linspace(0, T, total_step//xt_track_iteration_step), 
+            snake_length, 
+            label=f"Snake length",
+            linewidth=1,)
+        ax6[0].set_xlabel('Time (s)')
+        ax6[0].set_ylabel('length (#vehicles)')
+        ax6[0].set_title('Snake lengths')
+        ax6[0].legend()
 
     plt.show()
 
